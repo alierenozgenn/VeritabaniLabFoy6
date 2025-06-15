@@ -1,97 +1,151 @@
-NoSQL Deney Sonu Mini Proje ve Raporu
-=================================
+# 🚀 NoSQL Performance Comparison Lab
 
-NoSQL deneyinde kullanılan Redis, Hazelcast ve MongoDB teknolojileri kullanarak 3 farklı endpoint ile hizmet veren bir servis tasarlanması beklenmektedir. Her 3 teknolojide de 10.000 kayıtlık bir veri tabanı girişi yapılması gerekmektedir.
+[![Java](https://img.shields.io/badge/Java-20-orange.svg)](https://www.oracle.com/java/)
+[![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
+[![Redis](https://img.shields.io/badge/Redis-7.0-red.svg)](https://redis.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.0-green.svg)](https://www.mongodb.com/)
+[![Hazelcast](https://img.shields.io/badge/Hazelcast-3.12-lightblue.svg)](https://hazelcast.com/)
 
-Tutulacak kayıt:
-`student.json`
-```json
- "student_no" : "111111",
- "name" : "Münip Utandı":
- "department" : "Classical Turkish Music"
+> **NoSQL teknolojilerinin performans karşılaştırması için geliştirilmiş Java web servisi**
 
- "student_no" : "111112",
- "name" : "Nağme Yarkın":
- "department" : "Classical Turkish Music"
+Bu proje Redis, Hazelcast ve MongoDB teknolojilerinin performans analizini yapmak için tasarlanmış bir RESTful web servisidir. Her teknoloji için 10.000 öğrenci kaydı ile load testing yapılmaktadır.
 
- "student_no" : "111113",
- "name" : "Aysun Gültekin":
- "department" : "Turkish Folk Music"
-```
+## 📋 İçindekiler
 
-Uygulamanın başlangıç aşamasında 10.000 adet kaydı, veritabanlarına rastgele oluşturup ekletebilirsiniz. Veya anlamlı bir kayıt girişi de yapabilirsiniz.
+- [Özellikler](#-özellikler)
+- [Teknolojiler](#-teknolojiler)
+- [Kurulum](#-kurulum)
+- [Kullanım](#-kullanım)
+- [API Endpoints](#-api-endpoints)
+- [Performance Testleri](#-performance-testleri)
+- [Proje Yapısı](#-proje-yapısı)
+- [Sonuçlar](#-sonuçlar)
 
-1. endpoint doğrudan redis-ten alıp getirmelidir.
-2. endpoint doğrudan hazelcast-ten alıp getirmelidir.
-3. endpoint doğrudan mongodb-den alıp getirmelidir.
+## ✨ Özellikler
 
-`URL1: localhost:8080/nosql-lab-rd/student_no=xxxxxxxxxx`\
-`URL2: localhost:8080/nosql-lab-hz/student_no=xxxxxxxxxx`\
-`URL3: localhost:8080/nosql-lab-mon/student_no=xxxxxxxxxx`
+- 🔥 **3 NoSQL Teknolojisi**: Redis, Hazelcast, MongoDB
+- ⚡ **Yüksek Performans**: Connection pooling ve optimizasyonlar
+- 🧪 **Load Testing**: 1000 istek, 10 concurrent client
+- 📊 **Performance Metrics**: Response time, throughput, availability
+- 🔄 **RESTful API**: JSON response formatı
+- 🛡️ **Thread-Safe**: Concurrent request handling
 
+## 🛠 Teknolojiler
 
-Şablon proje dizini:
-```
-src/
-└── main/
-    ├── java/
-    │   └── app/
-    │       ├── Main.java
-    │       ├── model/Student.java
-    │       ├── store/RedisStore.java
-    │       ├── store/HazelcastStore.java
-    │       └── store/MongoStore.java
-```
+| Teknoloji | Versiyon | Açıklama |
+|-----------|----------|----------|
+| **Java** | 20 | Ana programlama dili |
+| **Spark Framework** | 2.9.4 | Web framework |
+| **Redis** | 7.0+ | In-memory key-value store |
+| **Hazelcast** | 3.12.13 | Distributed in-memory data grid |
+| **MongoDB** | 6.0+ | Document-based NoSQL database |
+| **Maven** | 3.8+ | Dependency management |
+| **Gson** | 2.10.1 | JSON serialization |
 
-Kodladığınız endpoint-leri test etmek için siege komutunu yükleyiniz. (1000 istek, eş zamanlı 10 istemci)
-`sudo apt-get install siege`
-```bash
-    # Redis
-    siege -H "Accept: application/json" -c10 -r100 "http://localhost:8080/nosql-lab-rd/student_no=2025000001" > ~/redis-siege.results
-    
-    # Hazelcast
-    siege -H "Accept: application/json" -c10 -r100 "http://localhost:8080/nosql-lab-hz/student_no=2025000001" > ~/hz-siege.results
+## 🚀 Kurulum
 
-    # MongoDB
-    siege -H "Accept: application/json" -c10 -r100 "http://localhost:8080/nosql-lab-mon/student_no=2025000001" > ~/mongodb-siege.results
-```
-Sonuçlar standart çıkışa değil `*.results` isimli dosyalara bastırabilir. Sonuçları bu dosyalardan alıp, raporunuza ekleyebilirsiniz.
+### Ön Gereksinimler
 
-siege komutu parametreleri:
-* H : gelen yanıt bir json verisi
-* c10: 10 eş zamanlı istemci (concurrent users)
-* r100: Her istemci 100 istek atsın (10x100 = toplam 1000 istek)
-* "URL": Test etmek istediğin endpoint
+\`\`\`bash
+# Java 20 kurulu olmalı
+java -version
 
+# Maven kurulu olmalı  
+mvn -version
 
-Rapora eklenecek sonuçlar:
-```
-    Transactions:                   1000 hits
-    Availability:                 100.00 %
-    Elapsed time:                  10.34 secs
-    Data transferred:               0.80 MB
-    Response time:                  0.08 secs
-    Transaction rate:              96.71 trans/sec
-    Throughput:                     0.08 MB/sec
-    Concurrency:                    7.89
-    Successful transactions:        1000
-    Failed transactions:               0
-```
-\
-Koşum zamanı testi:
-```bash
-    time seq 1 100 | xargs -n1 -P10 -I{} curl -s "http://localhost:8080/nosql-lab-rd/student_no=2025000001" > ~/redis-time.results
+# Redis, MongoDB, Hazelcast servisleri çalışır durumda olmalı
+\`\`\`
 
-    time seq 1 100 | xargs -n1 -P10 -I{} curl -s "http://localhost:8080/nosql-lab-rd/student_no=2025000001" > ~/hz-time.results
+### 1. Projeyi Klonlayın
 
-    time seq 1 100 | xargs -n1 -P10 -I{} curl -s "http://localhost:8080/nosql-lab-mon/student_no=2025000001" > ~/mongodb-time.results
-```
-```
-    Execution time:               0.xxxx
-```
-\
-`git clone https://github.com/ismailhakkituran/dbms-lab-nosql.git` komutu ile şablonu çalışma dizininize kopyalayıp, `idea .` IDE kullanarak proje şeklinde açabilirsiniz.
-\
-**(\*)** Deney kapsamında verilen bu çalışmayı hayal gücünüzle geliştirip, CV' nize eklemeniz tavsiye edilir.
+\`\`\`bash
+git clone https://github.com/[username]/nosql-performance-lab.git
+cd nosql-performance-lab
+\`\`\`
 
+### 2. NoSQL Servislerini Başlatın
 
+**Redis:**
+\`\`\`bash
+redis-server
+# Port: 6379
+\`\`\`
+
+**MongoDB:**
+\`\`\`bash
+mongod --dbpath ./data/db
+# Port: 27017
+\`\`\`
+
+**Hazelcast:**
+\`\`\`bash
+hz start
+# Port: 5701
+\`\`\`
+
+### 3. Projeyi Derleyin ve Çalıştırın
+
+\`\`\`bash
+# Bağımlılıkları yükle ve derle
+mvn clean compile
+
+# Uygulamayı başlat
+mvn exec:java -Dexec.mainClass="app.Main"
+\`\`\`
+
+🎉 **Uygulama http://localhost:8080 adresinde çalışmaya başlayacak!**
+
+## 💻 Kullanım
+
+### Hızlı Test
+
+\`\`\`bash
+# Server durumunu kontrol et
+curl http://localhost:8080/test
+
+# Redis'ten veri çek
+curl "http://localhost:8080/nosql-lab-rd?student_no=2025000001"
+
+# Hazelcast'ten veri çek  
+curl "http://localhost:8080/nosql-lab-hz?student_no=2025000001"
+
+# MongoDB'den veri çek
+curl "http://localhost:8080/nosql-lab-mon?student_no=2025000001"
+\`\`\`
+
+### Örnek Response
+
+\`\`\`json
+{
+  "ogrenciNo": "2025000001",
+  "adSoyad": "Ad Soyad 1", 
+  "bolum": "Bilgisayar"
+}
+\`\`\`
+
+## 🌐 API Endpoints
+
+| Endpoint | Metod | Açıklama | Örnek |
+|----------|-------|----------|-------|
+| `/test` | GET | Server durumu | `GET /test` |
+| `/nosql-lab-rd` | GET | Redis sorgusu | `GET /nosql-lab-rd?student_no=2025000001` |
+| `/nosql-lab-hz` | GET | Hazelcast sorgusu | `GET /nosql-lab-hz?student_no=2025000001` |
+| `/nosql-lab-mon` | GET | MongoDB sorgusu | `GET /nosql-lab-mon?student_no=2025000001` |
+
+### Query Parameters
+
+- `student_no` (required): Öğrenci numarası (2025000000 - 2025009999)
+
+## 🧪 Performance Testleri
+
+### Windows PowerShell ile Test
+
+```powershell
+# Test klasörüne git
+cd test
+
+# Hızlı endpoint testi
+.\quick-test.ps1
+
+# Tüm performance testlerini çalıştır
+.\run-all-tests.ps1
