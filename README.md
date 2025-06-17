@@ -59,7 +59,7 @@ mvn -version
 ### 1. Projeyi Klonlayın
 
 \`\`\`bash
-git clone https://github.com/[username]/nosql-performance-lab.git
+git clone https://github.com/alierenozgenn/VeritabaniLabFoy6.git
 cd nosql-performance-lab
 \`\`\`
 
